@@ -150,10 +150,19 @@ class Mobject(Container):
             return self
         for updater in self.updaters:
             parameters = get_parameters(updater)
+            # It would be better if we simply made a kwargs dictionary
+            # with "dt" and "self", and called updater(**kwargs).
+            # But it would break updaters that call "self" something else.
             if "dt" in parameters:
-                updater(self, dt)
+                if len(parameters) == 1:
+                    updater(dt)
+                else:
+                    updater(self, dt)
             else:
-                updater(self)
+                if len(parameters) == 0:
+                    updater()
+                else:
+                    updater(self)
         if recursive:
             for submob in self.submobjects:
                 submob.update(dt, recursive)
